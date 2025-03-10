@@ -48,5 +48,3 @@ async def main():
     await idle()
     await app.stop()
 
-if name == "main":
-    asyncio.run(main())
