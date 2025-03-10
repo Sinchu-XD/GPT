@@ -35,7 +35,7 @@ async def start(client, message):
     await message.reply("🤖 Hello! I am a ChatGPT-4-powered bot. Ask me anything!")
 
 # Handle user messages and respond with ChatGPT output
-@app.on_message(filters.text & ~filters.command)
+@app.on_message(filters.text & filters.command)
 async def chat(client, message):
     user_message = message.text
     response = chat_with_gpt(user_message)
