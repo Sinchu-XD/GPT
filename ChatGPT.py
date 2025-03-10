@@ -7,6 +7,11 @@ import openai
 OPENAI_API_KEY = "your_openai_api_key"
 openai.api_key = OPENAI_API_KEY
 
+API_ID = os.getenv("API_ID")
+API_HASH = os.getenv("API_HASH")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
 # Telegram Bot credentials
 API_ID = "your_api_id"
 API_HASH = "your_api_hash"
