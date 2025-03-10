@@ -1,7 +1,6 @@
-
 import os
 import openai
-from pyrogram import Client, filters
+from telethon import TelegramClient, events
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -16,7 +15,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 openai_client = openai.OpenAI(api_key=OPENAI_API_KEY)
 
 # Initialize Telegram bot
-bot = Client("chatgpt_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
+bot = TelegramClient("chatgpt_bot", API_ID, API_HASH).start(bot_token=BOT_TOKEN)
 
 # Function to get response from OpenAI
 def get_chatgpt_response(message):
@@ -30,15 +29,16 @@ def get_chatgpt_response(message):
         return f"Error: {str(e)}"
 
 # Start command
-@bot.on_message(filters.command("start"))
-async def start(client, message):
-    await message.reply_text("🤖 Hello! I'm a ChatGPT-powered bot. Send me a message, and I'll reply!")
+@bot.on(events.NewMessage(pattern="/start"))
+async def start(event):
+    await event.respond("🤖 Hello! I'm a ChatGPT-powered bot. Send me a message, and I'll reply!")
 
 # Handle messages
-@bot.on_message(filters.text)
-async def chat(client, message):
-    response = get_chatgpt_response(message.text)
-    await message.reply_text(response)
+@bot.on(events.NewMessage)
+async def chat(event):
+    response = get_chatgpt_response(event.message.message)
+    await event.respond(response)
 
 # Start the bot
-bot.run()
+print("🤖 ChatGPT Telegram Bot is running...")
+bot.run_until_disconnected()
