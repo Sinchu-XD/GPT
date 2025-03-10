@@ -24,9 +24,15 @@ def get_chatgpt_response(message):
             model="gpt-4",
             messages=[{"role": "user", "content": message}],
         )
-        return response.choices[0].message.content.strip()
+        reply = response.choices[0].message.content.strip()
+
+        # Ensure response is not empty
+        if not reply:
+            return "⚠️ I couldn't generate a response. Please try again."
+
+        return reply
     except Exception as e:
-        return f"Error: {str(e)}"
+        return f"❌ Error: {str(e)}"
 
 # Start command
 @bot.on(events.NewMessage(pattern="/start"))
@@ -36,8 +42,16 @@ async def start(event):
 # Handle messages
 @bot.on(events.NewMessage)
 async def chat(event):
-    response = get_chatgpt_response(event.message.message)
-    await event.respond(response)
+    user_message = event.message.message
+
+    # Prevent sending empty or invalid responses
+    response = get_chatgpt_response(user_message)
+
+    # Avoid formatting issues
+    try:
+        await event.respond(response, parse_mode="html")  # Ensures no formatting errors
+    except:
+        await event.respond("⚠️ Error sending the message. Please try again.")
 
 # Start the bot
 print("🤖 ChatGPT Telegram Bot is running...")
