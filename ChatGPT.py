@@ -1,50 +1,44 @@
+
 import os
-import asyncio
-from pyrogram import Client, filters
 import openai
+from pyrogram import Client, filters
+from dotenv import load_dotenv
 
-# Set up OpenAI API Key
-OPENAI_API_KEY = "your_openai_api_key"
-openai.api_key = OPENAI_API_KEY
+# Load environment variables
+load_dotenv()
 
-API_ID = os.getenv("API_ID")
+API_ID = int(os.getenv("API_ID"))
 API_HASH = os.getenv("API_HASH")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
+# Initialize OpenAI API
+openai_client = openai.OpenAI(api_key=OPENAI_API_KEY)
 
+# Initialize Telegram bot
+bot = Client("chatgpt_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
-# Initialize Pyrogram Client
-app = Client("chatgpt_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
-
-# Function to interact with OpenAI ChatGPT
-def chat_with_gpt(prompt):
+# Function to get response from OpenAI
+def get_chatgpt_response(message):
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4-turbo",  # Updated to latest model
-            messages=[{"role": "system", "content": "You are a helpful assistant."},
-                      {"role": "user", "content": prompt}]
+        response = openai_client.chat.completions.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": message}],
         )
-        return response["choices"][0]["message"]["content"].strip()
+        return response.choices[0].message.content.strip()
     except Exception as e:
         return f"Error: {str(e)}"
 
-# Handle /start command
-@app.on_message(filters.command("start"))
+# Start command
+@bot.on_message(filters.command("start"))
 async def start(client, message):
-    await message.reply("🤖 Hello! I am a ChatGPT-4-powered bot. Ask me anything!")
+    await message.reply_text("🤖 Hello! I'm a ChatGPT-powered bot. Send me a message, and I'll reply!")
 
-# Handle user messages and respond with ChatGPT output
-@app.on_message(filters.text & filters.command)
+# Handle messages
+@bot.on_message(filters.text)
 async def chat(client, message):
-    user_message = message.text
-    response = chat_with_gpt(user_message)
-    await message.reply(response)
+    response = get_chatgpt_response(message.text)
+    await message.reply_text(response)
 
-# Run the bot
-async def main():
-    await app.start()
-    print("ChatGPT-4 Telegram Bot is running...")
-    await idle()
-    await app.stop()
-
+# Start the bot
+bot.run()
